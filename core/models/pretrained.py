@@ -49,8 +49,11 @@ class ModelLoader:
     return model
 
 
-    
+"""
+loader = ModelLoader(task='image', name='resnet', version="50", pretrained=True)
+model = loader.load_model()
+"""
 
-def _gettfmodel(self,name:str,size,pretrained):
+def _gettfmodel(self,name:str,size,pretrained): 
     model = None
     pass
