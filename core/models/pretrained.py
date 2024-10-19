@@ -1,38 +1,54 @@
-import torch
 import torchvision.models as vmodels
-import torchaudio.models as amodels
+import torchaudio.models as amodels  # Placeholder for the actual audio models
 
-class PretrainedLoader:
+model_configs = {
+  "resnet": {
+    "50": vmodels.resnet50,
+    "101": vmodels.resnet101
+  },
+  "efficientnet": {
+    "b0": vmodels.efficientnet_b0,
+    "b1": vmodels.efficientnet_b1
+  },
+  "inceptionnet": {
+    "default": vmodels.inception_v3
+  },
+  "demucs": {
+    "default": amodels.HDemucs  # Example audio models
+  },
+  "wavernn": {
+    "default": amodels.WaveRNN
+  },
+  "conformer": {
+    "default": amodels.Conformer
+  }
+}
+
+class ModelLoader:
+  def __init__(self, task, name, version=None, pretrained=False):
+    self.task = task
+    self.name = name.lower()
+    self.version = version
+    self.pretrained = pretrained
+
+  def load_model(self):
+    model = None
     
-    def __init__(self,framework="torch",task='image') -> None:
-        self.framework = framework
-        self.task = task
+    if self.task == 'image':
+      if self.name in model_configs:
+        model_fn = model_configs[self.name].get(self.version, None) or model_configs[self.name].get("default", None)
+        if model_fn:
+          model = model_fn(pretrained=self.pretrained)
+    
+    elif self.task == 'audio':
+      if self.name in model_configs:
+        model_fn = model_configs[self.name].get("default", None)
+        if model_fn:
+          model = model_fn()  # Adjust based on audio models' needs for pre-trained weights
 
-    def get_model(self,model_name,size,pretrained=True):
-        if self.framework.lower() == "torch":
-            return self._getpytorchmodel(model_name,size,pretrained)
-        elif self.framework.lower() == "tf":
-            return self._gettfmodel(model_name,size,pretrained)
-        
-    def _getpytorchmodel(self,name:str,size,pretrained):
-        model = None
-        if self.task == 'image':
-            if name.lower() == 'resnet':
-                model = vmodels.ResNet() # adjust to load pretriained of size
-            if name.lower() == 'efficientnet':
-                model = vmodels.EfficientNet() 
-            if name.lower() == 'inceptionnet':
-                model = vmodels.Inception3()
-        
-        if self.task == 'audio':
-            if name.lower() == 'demucs':
-                model = amodels.HDemucs() # adjust to load pretriained of size
-            if name.lower() == 'wavernn':
-                model = amodels.WaveRNN()
-            if name.lower() == 'conformer':
-                model = amodels.Conformer()
+    return model
 
-        return model
+
     
 
 def _gettfmodel(self,name:str,size,pretrained):
