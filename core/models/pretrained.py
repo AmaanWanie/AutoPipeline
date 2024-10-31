@@ -29,6 +29,10 @@ model_configs = {
     "conformer": {"default": amodels.Conformer},
     "wav2vec2": {"default": amodels.Wav2Vec2},
     "wav2letter": {"default": amodels.Wav2Letter},
+    "gpt2": {"small": amodels.GPT2, "medium": amodels.GPT2, "large": amodels.GPT2, "xlarge": amodels.GPT2},
+    "bert": {"base": amodels.BERT, "large": amodels.BERT},
+    "roberta": {"base": amodels.RoBERTa, "large": amodels.RoBERTa},
+    "distilbert": {"base": amodels.DistilBERT, "large": amodels.DistilBERT},
 }
 
 
@@ -77,6 +81,14 @@ class ModelLoader:
         elif self.task == "audio":
             if self.name in model_configs and self.name in amodels.__dict__:
                 model_fn = model_configs[self.name].get("default", None)
+                if model_fn:
+                    model = model_fn(pretrained=self.pretrained)
+
+        elif self.task == "text":
+            if self.name in model_configs and self.name in amodels.__dict__:
+                model_fn = model_configs[self.name].get(
+                    self.version, None
+                ) or model_configs[self.name].get("default", None)
                 if model_fn:
                     model = model_fn(pretrained=self.pretrained)
 
