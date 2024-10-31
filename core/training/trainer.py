@@ -2,8 +2,14 @@ import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from livelossplot import PlotLosses
 from tqdm import tqdm
+import json  
+import os
 
-def trainer(model, epochs, train_loader, val_loader, optimizer, criterion, device):
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+os.makedirs('../logs', exist_ok=True)
+log_file_path = os.path.join('../logs', 'logs.json')
+
+def trainer(model, train_loader, val_loader, criterion, optimizer, device=device, epochs=2,):
     '''
     Takes the model to be trained, number of epochs, training DataLoader, validation DataLoader, 
     optimizer, loss criterion, and device, and returns the trained model.
@@ -12,6 +18,8 @@ def trainer(model, epochs, train_loader, val_loader, optimizer, criterion, devic
     liveloss = PlotLosses()
 
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=2, min_lr=0.0001)
+
+    all_logs = []  # Initialize an empty list to store logs
 
     for epoch in range(epochs):
         logs = {}
@@ -60,12 +68,11 @@ def trainer(model, epochs, train_loader, val_loader, optimizer, criterion, devic
         # Plot training and validation metrics
         liveloss.update(logs)
         liveloss.send()
-    
-    return model
 
+        all_logs.append(logs)  # Save logs for the current epoch
 
+    # Save all logs to a file
+    with open(log_file_path, "w") as f:
+        json.dump(all_logs, f, indent=4) # doesnt work?
 
-
-    
-
-    
+    return model, all_logs  
