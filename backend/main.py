@@ -4,9 +4,13 @@ from data.data_loader import DataLoader
 from models.pretrained import ModelLoader
 from models.custom import CustomModel
 from training.trainer import trainer
-
+from tasks.libs import install_libraries
 
 app = FastAPI()
+
+@app.post("/install_libraries")
+def install_libraries(task: str):
+    return install_libraries(task)
 
 @app.post("/train")
 def train_model(config: dict):
@@ -26,7 +30,7 @@ def load_custom_model(config: dict):
 def get_data_loader(config: dict):
     return DataLoader(config['data_dir'], config['batch_size'], config['image_size'], config['task']).get_data_loader(config['transform'])
 
-    
+
 
 @app.post("/get_transforms")
 def get_transforms(config: TransformConfig):
